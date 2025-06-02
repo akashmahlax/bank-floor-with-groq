@@ -84,6 +84,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Check authentication
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -91,21 +92,27 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     await connectToDatabase()
 
-    // Find the blog and check ownership
+    // Find the blog and populate author information
     const blog = await Blog.findById(params.id).populate("author", "email")
     if (!blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }
 
+    // Check if the user is the author
     if (blog.author.email !== session.user.email) {
-      return NextResponse.json({ error: "Unauthorized to delete this blog" }, { status: 403 })
+      return NextResponse.json({ error: "Not authorized to delete this blog" }, { status: 403 })
     }
 
+    // Delete the blog
     await Blog.findByIdAndDelete(params.id)
+    console.log("✅ Blog deleted successfully:", params.id)
 
-    return NextResponse.json({ message: "Blog deleted successfully" })
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Blog delete error:", error)
-    return NextResponse.json({ error: "Failed to delete blog" }, { status: 500 })
+    console.error("Delete blog error:", error)
+    return NextResponse.json(
+      { error: "Failed to delete blog" },
+      { status: 500 }
+    )
   }
 }

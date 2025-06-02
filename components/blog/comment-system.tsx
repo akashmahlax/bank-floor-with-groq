@@ -35,12 +35,9 @@ import Link from "next/link"
 interface Attachment {
   type: "image" | "document" | "video" | "audio" | "other"
   url: string
-  publicId?: string
   filename: string
-  originalName?: string
   size: number
-  mimeType: string
-  uploadedAt?: string
+  mimeType?: string
 }
 
 interface Comment {
@@ -312,81 +309,31 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
       )
     }
 
-    if (attachment.type === "video") {
-      return (
-        <div className="relative group">
-          <video src={attachment.url} controls className="rounded-lg max-w-full h-auto" style={{ maxHeight: "300px" }}>
-            Your browser does not support the video tag.
-          </video>
-          <Button
-            onClick={() => downloadAttachment(attachment)}
-            size="sm"
-            variant="secondary"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Download className="h-3 w-3" />
-          </Button>
-        </div>
-      )
-    }
-
-    if (attachment.type === "audio") {
-      return (
-        <Card className="p-4 max-w-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-full bg-green-100 dark:bg-green-900">
-              <Music className="h-5 w-5 text-green-600" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-sm">{attachment.filename}</p>
+    return (
+      <Card className="p-4 hover:bg-muted/50 transition-colors">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <File className="h-4 w-4 text-gray-500" />
+            <div>
+              <p className="text-sm font-medium truncate max-w-[150px]">{attachment.filename}</p>
               <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
             </div>
-            <Button onClick={() => downloadAttachment(attachment)} size="sm" variant="outline">
-              <Download className="h-4 w-4" />
-            </Button>
           </div>
-          <audio controls className="w-full">
-            <source src={attachment.url} type={attachment.mimeType} />
-            Your browser does not support the audio element.
-          </audio>
-        </Card>
-      )
-    }
-
-    return (
-      <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer max-w-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            {getFileIcon(attachment)}
-            <div className="flex-1">
-              <p className="text-sm font-medium truncate">{attachment.filename}</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{formatFileSize(attachment.size)}</span>
-                {attachment.mimeType && (
-                  <>
-                    <span>•</span>
-                    <span>{attachment.mimeType.split("/")[1]?.toUpperCase() || "FILE"}</span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-1">
-            <Button onClick={() => window.open(attachment.url, "_blank")} size="sm" variant="outline">
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button onClick={() => downloadAttachment(attachment)} size="sm" variant="outline">
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            onClick={() => window.open(attachment.url, "_blank")}
+            size="sm"
+            variant="outline"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
         </div>
       </Card>
     )
   }
 
   const renderComment = (comment: Comment, isReply = false) => (
-    <div key={comment._id} className={`space-y-3 ${isReply ? "ml-8 border-l-2 border-banking-gray-200 pl-4" : ""}`}>
-      <Card className="shadow-sm border-banking-gray-200">
+    <div key={comment._id} className={`space-y-3 ${isReply ? "ml-4 sm:ml-8 border-l-2 border-banking-gray-200 pl-4" : ""}`}>
+      <Card className="shadow-sm border-banking-gray-200 hover:shadow-md transition-shadow">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <Avatar className="h-10 w-10 border-2 border-banking-accent/50">
@@ -400,7 +347,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
             </Avatar>
 
             <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium text-banking-gray-900">
                   {comment.author?.name || "Banking Professional"}
                 </span>
@@ -411,7 +358,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
                   {new Date(comment.createdAt).toLocaleDateString()}
                 </span>
                 {comment.isEdited && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs text-banking-gray-500">
                     Edited
                   </Badge>
                 )}
@@ -440,12 +387,12 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
                   onClick={() => likeComment(comment._id)}
                   variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1 text-banking-gray-500 hover:text-red-500"
+                  className="flex items-center gap-1 text-banking-gray-500 hover:text-red-500 transition-colors"
                   disabled={status !== "authenticated"}
                 >
                   <Heart
                     className={`h-4 w-4 ${
-                      session?.user?.email && comment.likes && comment.likes.some((like) => like === session.user.email)
+                      session?.user?.email && comment.likes && comment.likes.some((like) => like === session.user?.email)
                         ? "fill-red-500 text-red-500"
                         : ""
                     }`}
@@ -457,7 +404,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
                   onClick={() => setReplyTo(replyTo === comment._id ? null : comment._id)}
                   variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1 text-banking-gray-500 hover:text-banking-primary"
+                  className="flex items-center gap-1 text-banking-gray-500 hover:text-banking-primary transition-colors"
                   disabled={status !== "authenticated"}
                 >
                   <Reply className="h-4 w-4" />
@@ -467,12 +414,12 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
 
               {/* Reply Form */}
               {replyTo === comment._id && session && (
-                <div className="mt-3 space-y-3 p-3 bg-muted/30 rounded-lg">
+                <div className="mt-3 space-y-3 p-3 bg-banking-accent/5 rounded-lg">
                   <Textarea
                     placeholder="Write a reply..."
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
-                    className="min-h-[80px]"
+                    className="min-h-[80px] border-banking-gray-300 focus:border-banking-primary focus:ring-banking-primary resize-none"
                   />
 
                   <div className="flex gap-2">
@@ -480,7 +427,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
                       onClick={() => submitComment(replyContent, comment._id)}
                       disabled={isSubmitting || isUploading}
                       size="sm"
-                      className="flex-1"
+                      className="flex-1 bg-banking-primary hover:bg-banking-secondary text-white transition-colors"
                     >
                       {isSubmitting ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -491,7 +438,12 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
                         </>
                       )}
                     </Button>
-                    <Button onClick={() => setReplyTo(null)} variant="outline" size="sm">
+                    <Button 
+                      onClick={() => setReplyTo(null)} 
+                      variant="outline" 
+                      size="sm"
+                      className="border-banking-gray-300 text-banking-gray-700 hover:bg-banking-gray-100"
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -522,26 +474,26 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
 
   return (
     <div className="mt-8 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-banking-primary/5 to-banking-accent/5 px-6 py-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <MessageCircle className="h-5 w-5 text-banking-primary" />
             Comments ({comments.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-6">
           {status === "loading" && (
-            <Alert>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <AlertDescription>Loading authentication...</AlertDescription>
+            <Alert className="bg-banking-accent/10 border-banking-accent/20">
+              <Loader2 className="h-4 w-4 animate-spin text-banking-primary" />
+              <AlertDescription className="text-banking-gray-700">Loading authentication...</AlertDescription>
             </Alert>
           )}
 
           {status === "unauthenticated" && (
-            <Alert>
-              <Lock className="h-4 w-4" />
-              <AlertDescription>
-                <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Alert className="bg-banking-accent/10 border-banking-accent/20">
+              <Lock className="h-4 w-4 text-banking-primary" />
+              <AlertDescription className="text-banking-gray-700">
+                <Link href="/auth/signin" className="text-banking-primary hover:text-banking-secondary font-medium">
                   Sign in
                 </Link>{" "}
                 to join the conversation and share your thoughts.
@@ -551,7 +503,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
 
           {/* New Comment Form - only show if authenticated */}
           {status === "authenticated" && session && (
-            <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-banking-gray-200">
+            <div className="space-y-4 bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-banking-gray-200">
               <div className="flex items-start gap-3">
                 <Avatar className="h-10 w-10 border-2 border-banking-accent/50">
                   <AvatarImage
@@ -573,7 +525,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
                     placeholder="Share your thoughts or experiences..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    className="min-h-[100px] border-banking-gray-300 focus:border-banking-primary focus:ring-banking-primary"
+                    className="min-h-[100px] border-banking-gray-300 focus:border-banking-primary focus:ring-banking-primary resize-none"
                   />
                 </div>
               </div>
@@ -581,7 +533,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
               {/* File Upload */}
               <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-colors ${
                   isDragActive
                     ? "border-banking-primary bg-banking-accent/20"
                     : "border-banking-gray-300 hover:border-banking-gray-400"
@@ -598,33 +550,31 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
               </div>
 
               {/* Attachment Preview */}
-              {attachments.length > 0 && (
+              {uploadedAttachments.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Attachments:</p>
-                  {attachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                      <div className="flex items-center gap-2">
-                        {getFileIcon(file)}
-                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
-                        <span className="text-xs text-muted-foreground">({formatFileSize(file.size)})</span>
-                        {uploadedAttachments[index] && (
-                          <Badge variant="outline" className="text-xs text-green-600">
-                            Uploaded
-                          </Badge>
-                        )}
+                  <p className="text-sm font-medium text-banking-gray-900">Attachments:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {uploadedAttachments.map((attachment, index) => (
+                      <div key={index} className="relative group">
+                        {renderAttachment(attachment)}
+                        <Button
+                          onClick={() => removeAttachment(index)}
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
-                      <Button onClick={() => removeAttachment(index)} size="sm" variant="ghost">
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
 
               <Button
                 onClick={() => submitComment(newComment)}
                 disabled={isSubmitting || isUploading || (!newComment.trim() && uploadedAttachments.length === 0)}
-                className="w-full bg-banking-primary hover:bg-banking-secondary text-white"
+                className="w-full bg-banking-primary hover:bg-banking-secondary text-white transition-colors"
               >
                 {isSubmitting ? (
                   <>
@@ -646,18 +596,18 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
             </div>
           )}
 
-          <Separator />
+          <Separator className="my-6" />
 
           {/* Comments List */}
           {isLoading ? (
             <div className="text-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading comments...</p>
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-banking-primary" />
+              <p className="text-banking-gray-600">Loading comments...</p>
             </div>
           ) : comments.length === 0 ? (
             <div className="text-center py-8">
-              <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+              <MessageCircle className="h-12 w-12 mx-auto mb-4 text-banking-gray-400" />
+              <p className="text-banking-gray-600">No comments yet. Be the first to comment!</p>
             </div>
           ) : (
             <div className="space-y-4">{comments.map((comment) => renderComment(comment))}</div>
@@ -668,15 +618,15 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
       {/* File Preview Modal */}
       {previewFile && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-4xl max-h-[90vh] overflow-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-semibold">{previewFile.filename}</h3>
+              <h3 className="font-semibold text-banking-gray-900">{previewFile.filename}</h3>
               <div className="flex items-center gap-2">
-                <Button onClick={() => downloadAttachment(previewFile)} size="sm" variant="outline">
+                <Button onClick={() => downloadAttachment(previewFile)} size="sm" variant="outline" className="border-banking-gray-300">
                   <Download className="h-4 w-4 mr-2" />
                   Download
                 </Button>
-                <Button onClick={() => setPreviewFile(null)} size="sm" variant="ghost">
+                <Button onClick={() => setPreviewFile(null)} size="sm" variant="ghost" className="text-banking-gray-500">
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -688,7 +638,7 @@ export default function CommentSystem({ blogId, commentsEnabled }: CommentSystem
                   alt={previewFile.filename}
                   width={800}
                   height={600}
-                  className="max-w-full h-auto"
+                  className="max-w-full h-auto rounded-lg"
                 />
               )}
             </div>
