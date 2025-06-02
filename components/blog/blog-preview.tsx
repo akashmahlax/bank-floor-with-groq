@@ -14,6 +14,7 @@ interface BlogData {
   featuredImage: {
     url: string
     alt: string
+    publicId?: string
   } | null
 }
 

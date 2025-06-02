@@ -125,17 +125,67 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
     }
   }, [editor, content])
 
+  useEffect(() => {
+    if (editor && mode === "markdown") {
+      const html = editor.getHTML()
+      // Convert HTML to markdown
+      const markdown = html
+        .replace(/<h1>(.*?)<\/h1>/g, '# $1\n')
+        .replace(/<h2>(.*?)<\/h2>/g, '## $1\n')
+        .replace(/<h3>(.*?)<\/h3>/g, '### $1\n')
+        .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+        .replace(/<em>(.*?)<\/em>/g, '*$1*')
+        .replace(/<p>(.*?)<\/p>/g, '$1\n')
+        .replace(/<br\s*\/?>/g, '\n')
+        .replace(/<ul>(.*?)<\/ul>/gs, (_, content) => {
+          return content
+            .replace(/<li>(.*?)<\/li>/g, '- $1\n')
+            .trim()
+        })
+        .replace(/<ol>(.*?)<\/ol>/gs, (_, content) => {
+          return content
+            .replace(/<li>(.*?)<\/li>/g, (_, item, index) => `${index + 1}. $1\n`)
+            .trim()
+        })
+        .replace(/<[^>]+>/g, '')
+        .trim()
+      setMarkdownContent(markdown)
+    }
+  }, [editor, mode])
+
   const handleMarkdownChange = (value: string) => {
     setMarkdownContent(value)
-    const htmlContent = value
-      .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-      .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-      .replace(/\*\*(.*)\*\*/gim, "<strong>$1</strong>")
-      .replace(/\*(.*)\*/gim, "<em>$1</em>")
-      .replace(/\n/gim, "<br>")
-    onChange(htmlContent)
+    if (editor) {
+      // Convert markdown to HTML
+      const html = value
+        .split('\n')
+        .map(line => {
+          if (line.startsWith('# ')) return `<h1>${line.slice(2)}</h1>`
+          if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`
+          if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`
+          if (line.startsWith('- ') || line.startsWith('* ')) return `<li>${line.slice(2)}</li>`
+          if (/^\d+\.\s/.test(line)) return `<li>${line.replace(/^\d+\.\s/, '')}</li>`
+          if (!line.trim()) return '<br>'
+          return `<p>${line}</p>`
+        })
+        .join('')
+        .replace(/(<li>.*?<\/li>)+/g, match => `<ul>${match}</ul>`)
+      
+      // Update editor content
+      editor.commands.setContent(html)
+      onChange(html)
+    }
   }
+
+  useEffect(() => {
+    if (editor) {
+      if (mode === "wysiwyg") {
+        editor.setEditable(true)
+      } else {
+        editor.setEditable(false)
+      }
+    }
+  }, [editor, mode])
 
   const addLink = () => {
     if (linkUrl && linkText) {

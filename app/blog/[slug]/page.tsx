@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -37,7 +37,8 @@ interface BlogPost {
   slug: string
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
+export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = use(params) // Unwrap params with use()
   const [blog, setBlog] = useState<BlogPost | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
@@ -45,12 +46,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
   useEffect(() => {
     fetchBlog()
-  }, [params.slug])
+  }, [resolvedParams.slug]) // Use resolvedParams.slug
 
   const fetchBlog = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch(`/api/blogs/slug/${params.slug}`)
+      const response = await fetch(`/api/blogs/slug/${resolvedParams.slug}`)
       const data = await response.json()
 
       if (!response.ok) {

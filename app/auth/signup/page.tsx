@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -30,8 +31,8 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
     setIsLoading(true)
+    setError("")
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
@@ -40,9 +41,11 @@ export default function SignUpPage() {
     }
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
@@ -53,13 +56,13 @@ export default function SignUpPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to register")
+        throw new Error(data.error || "Failed to sign up")
       }
 
-      // Redirect to sign in page after successful registration
-      router.push("/auth/signin?registered=true")
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
+      toast.success("Account created successfully! Please sign in.")
+      router.push("/auth/signin?message=Account created successfully! Please sign in.")
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to sign up")
     } finally {
       setIsLoading(false)
     }

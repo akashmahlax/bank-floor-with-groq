@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { use } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -40,7 +42,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { toast } from "sonner"
 import CommentSystem from "@/components/blog/comment-system"
-import { useRouter } from "next/navigation"
 
 interface BlogPost {
   _id: string
@@ -77,9 +78,10 @@ interface BlogPost {
   }>
 }
 
-export default function BlogViewPage({ params }: { params: { id: string } }) {
+export default function BlogViewPage({ params }: { params: Promise<{ id: string }> }) {
   const { data: session } = useSession()
   const router = useRouter()
+  const resolvedParams = use(params)
   const [blog, setBlog] = useState<BlogPost | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
@@ -89,7 +91,7 @@ export default function BlogViewPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchBlog()
-  }, [params.id])
+  }, []) // We can remove the dependency since resolvedParams won't change
 
   useEffect(() => {
     if (blog && session?.user?.email) {
@@ -104,7 +106,7 @@ export default function BlogViewPage({ params }: { params: { id: string } }) {
       setIsLoading(true)
       setError(null)
 
-      const response = await fetch(`/api/blogs/${params.id}`)
+      const response = await fetch(`/api/blogs/${resolvedParams.id}`)
       const data = await response.json()
 
       if (!response.ok) {
@@ -460,6 +462,13 @@ export default function BlogViewPage({ params }: { params: { id: string } }) {
             </Card>
           </div>
         </article>
+
+        {/* Comments Section */}
+        {blog && (
+          <div className="max-w-4xl mx-auto mt-8">
+            <CommentSystem blogId={blog._id} commentsEnabled={blog.commentsEnabled} />
+          </div>
+        )}
       </main>
     </div>
   )

@@ -34,14 +34,14 @@ export function Navbar() {
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="container-professional">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2.5">
+        <div className="flex items-center justify-between h-16 px-4 md:px-0">
+          <Link href="/" className="flex items-center space-x-2">
             <div className="h-9 w-9 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-base">BF</span>
             </div>
             <div>
-              <h1 className="text-base font-semibold text-foreground">Bank's Floor</h1>
-              <p className="text-xs text-muted-foreground">Banking Community</p>
+              <h1 className="text-sm md:text-base font-semibold text-foreground">Bank's Floor</h1>
+              <p className="text-[10px] md:text-xs text-muted-foreground">Banking Community</p>
             </div>
           </Link>
 
@@ -56,13 +56,13 @@ export function Navbar() {
               href="/blogs"
               className="text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-secondary-foreground px-3 py-1.5 rounded-md transition-colors"
             >
-              Insights
+              Blogs
             </Link>
             <Link
               href="/create-blog"
               className="text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-secondary-foreground px-3 py-1.5 rounded-md transition-colors"
             >
-              Contribute
+              Publish
             </Link>
           </nav>
 
@@ -80,8 +80,8 @@ export function Navbar() {
             )}
 
             <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
                   <span className="sr-only">Toggle menu</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -108,19 +108,19 @@ export function Navbar() {
                 <nav className="flex flex-col gap-4 mt-4">
                   <Link
                     href="/"
-                    className="text-sm font-medium px-3 py-1.5 rounded-md bg-secondary text-secondary-foreground"
+                    className="text-xs md:text-sm font-medium px-3 py-1.5 rounded-md bg-secondary text-secondary-foreground"
                   >
                     Home
                   </Link>
                   <Link
                     href="/blogs"
-                    className="text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-secondary-foreground px-3 py-1.5 rounded-md transition-colors"
+                    className="text-xs md:text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-secondary-foreground px-3 py-1.5 rounded-md transition-colors"
                   >
                     Insights
                   </Link>
                   <Link
                     href="/create-blog"
-                    className="text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-secondary-foreground px-3 py-1.5 rounded-md transition-colors"
+                    className="text-xs md:text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-secondary-foreground px-3 py-1.5 rounded-md transition-colors"
                   >
                     Contribute
                   </Link>
@@ -130,8 +130,8 @@ export function Navbar() {
 
             {session ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                <DropdownMenuTrigger asChild className="ml-2">
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
                     <Avatar className="h-9 w-9">
                       <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
                       <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>

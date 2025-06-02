@@ -435,9 +435,9 @@ export default function CreateBlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
+      <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -447,20 +447,20 @@ export default function CreateBlogPage() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Share Your Story</h1>
-                <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <h1 className="text-base md:text-lg font-semibold text-foreground">Share Your Story</h1>
+                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   <span>
                     {wordCount} words • {readingTime} min read
                   </span>
                   {savedBlogId && (
-                    <Badge variant="outline" className="text-xs border-gray-300">
+                    <Badge variant="outline" className="text-xs">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Saved
                     </Badge>
                   )}
                   {blogData.mediaFiles.length > 0 && (
-                    <Badge variant="outline" className="text-xs border-gray-300">
+                    <Badge variant="outline" className="text-xs">
                       <FileText className="h-3 w-3 mr-1" />
                       {blogData.mediaFiles.length} files
                     </Badge>
@@ -503,19 +503,19 @@ export default function CreateBlogPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Main Editor */}
           <div className="lg:col-span-3">
-            <Card className="border-gray-200 bg-white shadow-sm">
+            <Card className="border-border bg-card">
               <CardContent className="p-0">
                 {!isPreviewMode ? (
                   <div className="space-y-0">
                     {/* Title Section */}
                     <div className="p-4 pb-3">
                       <Input
-                        placeholder="Share your banking experience..."
+                        placeholder="What's in your mind..."
                         value={blogData.title}
                         onChange={(e) => setBlogData((prev) => ({ ...prev, title: e.target.value }))}
-                        className="text-2xl font-bold border-0 px-0 focus-visible:ring-0 placeholder:text-gray-400 bg-transparent"
+                        className="text-xl md:text-2xl font-bold border-0 px-0 focus-visible:ring-0 placeholder:text-muted-foreground bg-transparent"
                       />
-                      <div className="flex items-center space-x-2 text-xs text-gray-500 mt-2">
+                      <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-2">
                         <Globe className="h-3 w-3" />
                         <span>URL: /story/{blogData.slug || "your-story-title"}</span>
                       </div>
@@ -524,7 +524,7 @@ export default function CreateBlogPage() {
                     {/* Media Upload Section */}
                     {isClient && (
                       <div className="px-4 pb-3">
-                        <Label className="text-sm font-medium mb-2 block text-gray-700">Attachments</Label>
+                        <Label className="text-sm font-medium mb-2 block text-foreground">Attachments</Label>
                         <MediaUploader
                           onUpload={handleMediaUpload}
                           currentFiles={blogData.mediaFiles}
@@ -534,25 +534,25 @@ export default function CreateBlogPage() {
                         {/* Display uploaded files */}
                         {blogData.mediaFiles.length > 0 && (
                           <div className="mt-3">
-                            <Label className="text-sm font-medium mb-2 block text-gray-700">
+                            <Label className="text-sm font-medium mb-2 block text-foreground">
                               Uploaded Files ({blogData.mediaFiles.length})
                             </Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                               {blogData.mediaFiles.map((file, index) => (
                                 <div
                                   key={index}
-                                  className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200"
+                                  className="flex items-center justify-between p-2 bg-muted rounded border border-border"
                                 >
                                   <div className="flex items-center gap-2 flex-1">
-                                    <FileText className="h-4 w-4 text-gray-600" />
-                                    <span className="text-sm truncate text-gray-700">{file.name}</span>
-                                    <span className="text-xs text-gray-500">({Math.round(file.size / 1024)}KB)</span>
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm truncate text-foreground">{file.name}</span>
+                                    <span className="text-xs text-muted-foreground">({Math.round(file.size / 1024)}KB)</span>
                                   </div>
                                   <Button
                                     onClick={() => removeMediaFile(index)}
                                     size="sm"
                                     variant="ghost"
-                                    className="h-6 w-6 p-0 text-gray-500"
+                                    className="h-6 w-6 p-0 text-muted-foreground"
                                   >
                                     <X className="h-3 w-3" />
                                   </Button>
@@ -566,29 +566,29 @@ export default function CreateBlogPage() {
 
                     {/* Excerpt */}
                     <div className="px-4 pb-3">
-                      <Label className="text-sm font-medium mb-2 block text-gray-700">Brief Summary (Optional)</Label>
+                      <Label className="text-sm font-medium mb-2 block text-foreground">Brief Summary (Optional)</Label>
                       <Textarea
                         placeholder="Briefly describe your experience or what others can expect to learn..."
                         value={blogData.excerpt}
                         onChange={(e) => setBlogData((prev) => ({ ...prev, excerpt: e.target.value }))}
-                        className="min-h-[60px] border-gray-300"
+                        className="min-h-[60px] border-border"
                         maxLength={300}
                       />
-                      <div className="text-xs text-gray-500 mt-1">{blogData.excerpt.length}/300</div>
+                      <div className="text-xs text-muted-foreground mt-1">{blogData.excerpt.length}/300</div>
                     </div>
 
-                    <Separator className="bg-gray-200" />
+                    <Separator />
 
                     {/* Rich Text Editor */}
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <Label className="text-sm font-medium text-gray-700">Your Story</Label>
+                        <Label className="text-sm font-medium text-foreground">Your Story</Label>
                         {isClient && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setShowAI(!showAI)}
-                            className="flex items-center gap-2 border-gray-300 text-gray-700"
+                            className="flex items-center gap-2"
                           >
                             <Sparkles className="h-4 w-4" />
                             AI Help
@@ -641,10 +641,10 @@ export default function CreateBlogPage() {
           {/* Sidebar */}
           <div className="space-y-4">
             {/* Publish Card */}
-            <Card className="border-gray-200 bg-white shadow-sm">
+            <Card className="border-border bg-card">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center text-gray-900">
-                  <Heart className="h-5 w-5 mr-2 text-gray-700" />
+                <CardTitle className="text-lg flex items-center text-foreground">
+                  <Heart className="h-5 w-5 mr-2 text-muted-foreground" />
                   Share Your Story
                 </CardTitle>
               </CardHeader>
@@ -653,7 +653,7 @@ export default function CreateBlogPage() {
                   <Button
                     onClick={handlePublish}
                     disabled={isPublishing || !blogData.title.trim() || !blogData.content.trim() || !blogData.category}
-                    className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium"
+                    className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                   >
                     {isPublishing ? (
                       <>
@@ -667,42 +667,42 @@ export default function CreateBlogPage() {
                       </>
                     )}
                   </Button>
-                  <p className="text-xs text-gray-600 mt-2">Your story will help fellow banking professionals</p>
+                  <p className="text-xs text-muted-foreground mt-2">Your story will help fellow banking professionals</p>
                 </div>
 
                 {/* Requirements checklist */}
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     {blogData.title.trim() ? (
-                      <CheckCircle className="h-4 w-4 text-gray-700" />
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+                      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
                     )}
-                    <span className={blogData.title.trim() ? "text-gray-700" : "text-gray-500"}>Title added</span>
+                    <span className={blogData.title.trim() ? "text-foreground" : "text-muted-foreground"}>Title added</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {blogData.content.trim() ? (
-                      <CheckCircle className="h-4 w-4 text-gray-700" />
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+                      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
                     )}
-                    <span className={blogData.content.trim() ? "text-gray-700" : "text-gray-500"}>Story written</span>
+                    <span className={blogData.content.trim() ? "text-foreground" : "text-muted-foreground"}>Story written</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {blogData.category ? (
-                      <CheckCircle className="h-4 w-4 text-gray-700" />
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+                      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
                     )}
-                    <span className={blogData.category ? "text-gray-700" : "text-gray-500"}>Topic selected</span>
+                    <span className={blogData.category ? "text-foreground" : "text-muted-foreground"}>Topic selected</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {blogData.mediaFiles.length > 0 ? (
-                      <CheckCircle className="h-4 w-4 text-gray-700" />
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+                      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
                     )}
-                    <span className={blogData.mediaFiles.length > 0 ? "text-gray-700" : "text-gray-500"}>
+                    <span className={blogData.mediaFiles.length > 0 ? "text-foreground" : "text-muted-foreground"}>
                       {blogData.mediaFiles.length} files attached
                     </span>
                   </div>
@@ -711,21 +711,21 @@ export default function CreateBlogPage() {
             </Card>
 
             {/* Category & Tags */}
-            <Card className="border-gray-200 bg-white shadow-sm">
+            <Card className="border-border bg-card">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center text-gray-900">
-                  <Tag className="h-5 w-5 mr-2 text-gray-700" />
+                <CardTitle className="text-lg flex items-center text-foreground">
+                  <Tag className="h-5 w-5 mr-2 text-muted-foreground" />
                   Topic & Tags
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Topic *</Label>
+                  <Label className="text-sm font-medium text-foreground">Topic *</Label>
                   <Select
                     value={blogData.category}
                     onValueChange={(value) => setBlogData((prev) => ({ ...prev, category: value }))}
                   >
-                    <SelectTrigger className="border-gray-300">
+                    <SelectTrigger className="border-border">
                       <SelectValue placeholder="Select topic" />
                     </SelectTrigger>
                     <SelectContent>
@@ -739,16 +739,16 @@ export default function CreateBlogPage() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Tags</Label>
+                  <Label className="text-sm font-medium text-foreground">Tags</Label>
                   <div className="flex space-x-2">
                     <Input
                       placeholder="Add tag..."
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                      className="flex-1 border-gray-300"
+                      className="flex-1 border-border"
                     />
-                    <Button onClick={addTag} size="sm" variant="outline" className="border-gray-300">
+                    <Button onClick={addTag} size="sm" variant="outline" className="border-border">
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
@@ -757,7 +757,7 @@ export default function CreateBlogPage() {
                       <Badge
                         key={tag}
                         variant="outline"
-                        className="flex items-center gap-1 border-gray-300 text-gray-700"
+                        className="flex items-center gap-1 border-border text-foreground"
                       >
                         {tag}
                         <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
@@ -769,13 +769,13 @@ export default function CreateBlogPage() {
             </Card>
 
             {/* Settings */}
-            <Card className="border-gray-200 bg-white shadow-sm">
+            <Card className="border-border bg-card">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-gray-900">Privacy Settings</CardTitle>
+                <CardTitle className="text-lg text-foreground">Privacy Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-gray-700">Enable Comments</Label>
+                  <Label className="text-sm font-medium text-foreground">Enable Comments</Label>
                   <Switch
                     checked={blogData.commentsEnabled}
                     onCheckedChange={(checked) => setBlogData((prev) => ({ ...prev, commentsEnabled: checked }))}
@@ -783,12 +783,12 @@ export default function CreateBlogPage() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Visibility</Label>
+                  <Label className="text-sm font-medium text-foreground">Visibility</Label>
                   <Select
                     value={blogData.visibility}
                     onValueChange={(value: any) => setBlogData((prev) => ({ ...prev, visibility: value }))}
                   >
-                    <SelectTrigger className="border-gray-300">
+                    <SelectTrigger className="border-border">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
