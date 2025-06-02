@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@layer base {
+  :root {
+    /* Light Mode - Black and Pink Theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 330 100% 50%; /* Vibrant pink */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 330 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 330 100% 50%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark Mode - Black and Pink Theme */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 330 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 330 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 330 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    transition: background-color 0.15s ease-out, border-color 0.15s ease-out, color 0.15s ease-out, box-shadow 0.15s ease-out;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/50 rounded;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/70;
+  }
+}
+
+/* Professional Card Styles */
+.card-professional {
+  @apply bg-card border border-border/70 rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+}
+
+.dark .card-professional {
+  box-shadow: 0 4px 15px -3px rgba(255, 0, 128, 0.1), 0 2px 8px -2px rgba(255, 0, 128, 0.08);
+}
+
+/* Professional Button Styles */
+.btn-primary-professional {
+  @apply inline-flex items-center justify-center rounded-md px-6 py-2.5 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all;
+  letter-spacing: 0.025em;
+}
+
+.btn-secondary-professional {
+  @apply inline-flex items-center justify-center rounded-md px-6 py-2.5 text-sm font-semibold border border-primary text-primary bg-transparent hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all;
+  letter-spacing: 0.025em;
+}
+
+/* Professional Typography */
+.text-hero-professional {
+  @apply text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl;
+}
+
+.text-subtitle-professional {
+  @apply text-lg text-muted-foreground leading-relaxed;
+}
+
+/* Professional Badge */
+.badge-professional {
+  @apply inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary;
+}
+
+.dark .badge-professional {
+  @apply bg-primary/20 text-primary-foreground;
+}
+
+/* Professional Section Spacing */
+.section-professional {
+  @apply py-16 md:py-24;
+}
+
+/* Professional Container */
+.container-professional {
+  @apply container mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Professional Animations */
+.animate-fade-in-professional {
+  animation: fadeInProfessional 0.5s ease-out;
+}
+
+.animate-slide-up-professional {
+  animation: slideUpProfessional 0.5s ease-out forwards;
+}
+
+@keyframes fadeInProfessional {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpProfessional {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Professional Hover Effects */
+.hover-lift-professional {
+  transition: transform 0.25s ease-out;
+}
+
+.hover-lift-professional:hover {
+  transform: translateY(-3px);
+}
+
+/* Blog Card Styles */
+.blog-card {
+  @apply bg-card border border-border/70 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden;
+}
+
+.blog-card-image {
+  @apply relative h-48 w-full overflow-hidden;
+}
+
+.blog-card-image img {
+  @apply object-cover transition-transform duration-300;
+}
+
+.blog-card:hover .blog-card-image img {
+  @apply scale-105;
+}
+
+.blog-card-content {
+  @apply p-6;
+}
+
+.blog-card-badge {
+  @apply inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary;
+}
+
+.blog-card-title {
+  @apply mt-2 text-lg font-semibold text-foreground line-clamp-2;
+}
+
+.blog-card-excerpt {
+  @apply mt-2 text-sm text-muted-foreground line-clamp-3;
+}
+
+.blog-card-footer {
+  @apply mt-4 pt-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground;
+}
+
+/* Loading Skeleton */
+.skeleton {
+  @apply animate-pulse bg-muted/50;
+}
+
+.skeleton-text {
+  @apply h-4 rounded-md;
+}
+
+.skeleton-image {
+  @apply h-48 rounded-t-xl;
+}
