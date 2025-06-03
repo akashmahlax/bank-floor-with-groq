@@ -93,6 +93,15 @@ export default function AdminPage() {
           {blogs.map((blog) => (
             <Card key={blog._id} className="relative">
               <CardContent className="p-4">
+                <div className="aspect-w-16 aspect-h-9 mb-3 bg-muted rounded overflow-hidden flex items-center justify-center">
+                  {/* Blog featured image with fallback and error handling */}
+                  <img
+                    src={blog.featuredImage?.url || "/placeholder.svg"}
+                    alt={blog.featuredImage?.alt || blog.title || "Blog image"}
+                    className="object-cover w-full h-full"
+                    onError={e => { e.currentTarget.src = "/placeholder.svg"; }}
+                  />
+                </div>
                 <div className="font-semibold mb-1">{blog.title}</div>
                 <div className="text-xs text-muted-foreground mb-2">{blog.author?.name || "Unknown"}</div>
                 <Badge className="mb-2">{blog.status}</Badge>
