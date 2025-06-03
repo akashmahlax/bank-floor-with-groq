@@ -144,15 +144,15 @@ export function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
+                  {/* <DropdownMenuItem asChild>
                     <Link href="/settings">Settings</Link>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => signOut()}
                     className="text-red-600 focus:text-red-600"
                   >
-                    Log out
+                    Log out  
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -165,7 +165,7 @@ export function Navbar() {
                 </Link>
                 <Link href="/auth/signup">
                   <Button size="sm" className="btn-primary-professional">
-                    Join Network
+                    Join 
                   </Button>
                 </Link>
               </>
