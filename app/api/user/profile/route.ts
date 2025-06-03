@@ -23,9 +23,41 @@ export async function GET(request: NextRequest) {
 
     // Find all blogs by this user
     const blogs = await Blog.find({ author: user._id })
-      .select("title excerpt category status publishedAt views likes")
+      .populate("author", "name email avatar bio createdAt")
+      .select("title excerpt category status publishedAt views likes featuredImage readingTime slug")
       .sort({ createdAt: -1 })
       .lean()
+
+    // Ensure author and featuredImage are always present and formatted
+    const formattedBlogs = blogs.map((blog) => {
+      // Defensive: always ensure featuredImage is a valid object with url and alt
+      if (
+        !blog.featuredImage ||
+        typeof blog.featuredImage !== "object" ||
+        !blog.featuredImage.url
+      ) {
+        blog.featuredImage = { url: "/placeholder.svg", alt: blog.title }
+      } else {
+        if (!blog.featuredImage.alt) {
+          blog.featuredImage.alt = blog.title
+        }
+      }
+      if (!blog.author || typeof blog.author === "string") {
+        blog.author = {
+          _id: blog.author || "unknown",
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar || { url: "/placeholder.svg" },
+          bio: user.bio || "",
+        }
+      }
+      return blog
+    })
+
+    // Debug: Log featuredImage URLs
+    formattedBlogs.forEach((blog) => {
+      console.log(`[PROFILE API] Blog: ${blog.title} | featuredImage:`, blog.featuredImage)
+    })
 
     // Format the profile data
     const profile = {
@@ -36,7 +68,7 @@ export async function GET(request: NextRequest) {
       bio: user.bio,
       role: user.role,
       createdAt: user.createdAt,
-      blogs: blogs,
+      blogs: formattedBlogs,
     }
 
     return NextResponse.json({ profile })

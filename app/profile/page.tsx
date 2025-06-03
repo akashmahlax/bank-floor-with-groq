@@ -19,9 +19,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Calendar, Eye, Heart, Edit, Trash2 } from "lucide-react"
+import { Calendar, Eye, Heart, Edit, Trash2, MoreVertical } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import Image from "next/image"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface UserProfile {
   _id: string
@@ -42,6 +49,11 @@ interface UserProfile {
     publishedAt: string
     views: number
     likes: string[]
+    readingTime: number
+    featuredImage?: {
+      url: string
+      alt: string
+    }
   }>
 }
 
@@ -50,6 +62,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingBlogId, setDeletingBlogId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -78,6 +91,7 @@ export default function ProfilePage() {
 
   const deleteBlog = async (blogId: string) => {
     try {
+      setDeletingBlogId(blogId)
       const response = await fetch(`/api/blogs/${blogId}`, {
         method: "DELETE",
       })
@@ -92,6 +106,8 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Delete error:", error)
       toast.error(error instanceof Error ? error.message : "Failed to delete blog")
+    } finally {
+      setDeletingBlogId(null)
     }
   }
 
@@ -162,12 +178,7 @@ export default function ProfilePage() {
                       <Badge variant="outline" className="border-primary/20 text-primary">
                         {profile.role}
                       </Badge>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href="/profile/edit">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                          Edit Profile
-                        </Link>
-                      </Button>
+                      {/* Edit Profile feature coming soon */}
                     </div>
                   </div>
                   {profile.bio && (
@@ -202,45 +213,83 @@ export default function ProfilePage() {
                   {profile.blogs
                     .filter(blog => blog.status === "published")
                     .map((blog) => (
-                      <Card key={blog._id} className="group hover-lift-professional">
-                        <CardContent className="p-6">
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <Badge className="blog-card-badge">{blog.category}</Badge>
-                              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {blog.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground line-clamp-2">{blog.excerpt}</p>
-                            </div>
-                            <div className="flex items-center justify-between text-sm text-muted-foreground">
-                              <span>{formatDate(blog.publishedAt)}</span>
-                              <div className="flex items-center gap-4">
+                      <Card key={blog._id} className="group relative overflow-hidden bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">
+                        <div className="relative aspect-[16/9]">
+                          <Link href={`/blog/view/${blog._id}`} className="block">
+                            <Image
+                              src={blog.featuredImage?.url || "/placeholder.svg"}
+                              alt={blog.title}
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              className="object-cover"
+                            />
+                          </Link>
+                          <div className="absolute top-3 left-3">
+                            <Badge variant="outline" className="bg-background/90 text-foreground">
+                              {blog.category}
+                            </Badge>
+                          </div>
+                          <div className="absolute top-3 right-12">
+                            <Badge variant="outline" className="bg-background/90 text-foreground text-xs">
+                              {blog.readingTime} min read
+                            </Badge>
+                          </div>
+                          <div className="absolute top-3 right-3">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-background/90 hover:bg-background">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/blog/${blog._id}/edit`} className="flex items-center">
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => deleteBlog(blog._id)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                        <Link href={`/blog/view/${blog._id}`}>
+                          <CardContent className="p-4 space-y-2">
+                            <h3 className="line-clamp-2 text-lg font-semibold group-hover:text-primary transition-colors">
+                              {blog.title}
+                            </h3>
+                            {blog.excerpt && (
+                              <p className="line-clamp-2 text-sm text-muted-foreground">{blog.excerpt}</p>
+                            )}
+                            <div className="flex items-center justify-between pt-4">
+                              <div className="flex items-center gap-2 text-sm">
+                                <Avatar className="h-6 w-6">
+                                  <AvatarImage src={profile.avatar?.url} />
+                                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                                    {getInitials(profile.name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>{profile.name}</span>
+                              </div>
+                              <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                                 <span className="flex items-center">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-1"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                  <Eye className="h-3 w-3 mr-1" />
                                   {blog.views}
                                 </span>
                                 <span className="flex items-center">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-1"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                                  {blog.likes.length}
+                                  <Heart className="h-3 w-3 mr-1" />
+                                  {blog.likes ? blog.likes.length : 0}
                                 </span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm" className="flex-1" asChild>
-                                <Link href={`/blog/view/${blog._id}`}>
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                  View
-                                </Link>
-                              </Button>
-                              <Button variant="outline" size="sm" className="flex-1" asChild>
-                                <Link href={`/blog/edit/${blog._id}`}>
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                  Edit
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
+                          </CardContent>
+                        </Link>
                       </Card>
                     ))}
                 </div>
@@ -283,6 +332,52 @@ export default function ProfilePage() {
                                   Continue Editing
                                 </Link>
                               </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-red-200 text-red-600 hover:border-red-500 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950"
+                                    disabled={deletingBlogId === blog._id}
+                                  >
+                                    {deletingBlogId === blog._id ? (
+                                      <>
+                                        <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Deleting...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Trash2 className="h-4 w-4 mr-1" />
+                                        Delete
+                                      </>
+                                    )}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this blog post? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel asChild>
+                                      <Button variant="outline">Cancel</Button>
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction asChild>
+                                      <Button
+                                        variant="destructive"
+                                        onClick={() => deleteBlog(blog._id)}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
                           </div>
                         </CardContent>
@@ -291,12 +386,12 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <h3 className="text-lg font-medium text-foreground mb-2">No drafts</h3>
-                  <p className="text-muted-foreground mb-4">Start writing your next story</p>
+                  <h3 className="text-lg font-medium text-foreground mb-2">No drafts yet</h3>
+                  <p className="text-muted-foreground mb-4">Your drafts will appear here</p>
                   <Button asChild>
                     <Link href="/create-blog">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                      Create Story
+                      Create Draft
                     </Link>
                   </Button>
                 </div>
@@ -305,124 +400,17 @@ export default function ProfilePage() {
 
             <TabsContent value="saved" className="space-y-6">
               <div className="text-center py-12">
-                <h3 className="text-lg font-medium text-foreground mb-2">No saved stories</h3>
-                <p className="text-muted-foreground mb-4">Save stories you want to read later</p>
+                <h3 className="text-lg font-medium text-foreground mb-2">Saved Stories</h3>
+                <p className="text-muted-foreground mb-4">Your saved stories will appear here</p>
                 <Button asChild>
-                  <Link href="/blogs">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="12" x2="12" y2="19"></line></svg>
+                  <Link href="/browse">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5"><path d="M3 12h18M12 3l9 9-9 9-9-9z"></path></svg>
                     Browse Stories
                   </Link>
                 </Button>
               </div>
             </TabsContent>
           </Tabs>
-
-          {/* Blog List */}
-          <div className="mt-8 space-y-6">
-            {profile?.blogs.map((blog) => (
-              <Card key={blog._id} className="overflow-hidden bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-3 flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-                          {blog.category}
-                        </Badge>
-                        <Badge variant={blog.status === "published" ? "default" : "secondary"} className="capitalize">
-                          {blog.status}
-                        </Badge>
-                      </div>
-                      
-                      <Link href={`/blog/view/${blog._id}`} className="block group">
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">
-                          {blog.title}
-                        </h3>
-                      </Link>
-                      
-                      <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
-                        {blog.excerpt}
-                      </p>
-
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        {blog.publishedAt && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {formatDate(blog.publishedAt)}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          {blog.views} views
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="h-4 w-4" />
-                          {blog.likes.length} likes
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="border-gray-200 hover:border-blue-500 dark:border-gray-800"
-                      >
-                        <Link href={`/blog/edit/${blog._id}`}>
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Link>
-                      </Button>
-
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-red-200 text-red-600 hover:border-red-500 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950"
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-gray-900 dark:text-gray-100">Delete Blog Post</AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
-                              Are you sure you want to delete &quot;{blog.title}&quot;? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteBlog(blog._id)}
-                              className="bg-red-600 text-white hover:bg-red-700 dark:hover:bg-red-700 focus:ring-red-500"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-            {profile?.blogs.length === 0 && (
-              <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No blog posts yet</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">Start sharing your thoughts and experiences with the community.</p>
-                <Button asChild>
-                  <Link href="/create-blog">
-                    Create Your First Blog
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
