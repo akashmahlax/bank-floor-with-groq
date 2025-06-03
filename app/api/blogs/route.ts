@@ -134,11 +134,31 @@ export async function GET(request: NextRequest) {
     // Fetch all published blogs with author information
     const blogs = await Blog.find({ status: "published" })
       .populate("author", "name email avatar bio createdAt")
+      .select("title excerpt category status publishedAt views likes featuredImage readingTime slug tags comments")
       .sort({ publishedAt: -1 })
       .lean()
 
-    // Ensure author information is properly formatted
+    // Ensure author information and featuredImage are properly formatted
     const formattedBlogs = blogs.map((blog) => {
+      // Ensure featuredImage is properly formatted
+      if (!blog.featuredImage || typeof blog.featuredImage !== "object") {
+        blog.featuredImage = {
+          url: "/placeholder.svg",
+          alt: blog.title,
+        }
+      }
+
+      // Ensure tags array exists
+      if (!blog.tags) {
+        blog.tags = []
+      }
+
+      // Ensure comments array exists
+      if (!blog.comments) {
+        blog.comments = []
+      }
+
+      // Ensure author information is properly formatted
       if (!blog.author || typeof blog.author === "string") {
         blog.author = {
           _id: blog.author || "unknown",

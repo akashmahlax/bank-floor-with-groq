@@ -231,33 +231,44 @@ export default function HomePage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {blogs.map((blog) => (
                 <Card key={blog._id} className="group hover-lift-professional">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Badge className="blog-card-badge">{blog.category}</Badge>
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {blog.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{blog.excerpt}</p>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={blog.author.avatar?.url} alt={blog.author.name} />
-                            <AvatarFallback>{getInitials(blog.author.name)}</AvatarFallback>
-                          </Avatar>
-                          <span>{blog.author.name}</span>
+                  <CardContent className="p-0">
+                    {/* Featured Image */}
+                    <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
+                      <Image
+                        src={blog.featuredImage?.url || "/placeholder.svg"}
+                        alt={blog.featuredImage?.alt || blog.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Badge className="blog-card-badge">{blog.category}</Badge>
+                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            {blog.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{blog.excerpt}</p>
                         </div>
-                        <span>{blog.readingTime} min read</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{formatDate(blog.publishedAt)}</span>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/blog/view/${blog._id}`}>
-                            Read More
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 h-4 w-4"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
-                          </Link>
-                        </Button>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={blog.author.avatar?.url} alt={blog.author.name} />
+                              <AvatarFallback>{getInitials(blog.author.name)}</AvatarFallback>
+                            </Avatar>
+                            <span>{blog.author.name}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="flex items-center gap-1">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                              {blog.readingTime} min read
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                              {blog.views}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

@@ -84,34 +84,65 @@ export default function MediaUploader({
     return "bg-gray-50 border-gray-200 dark:bg-gray-950 dark:border-gray-800"
   }
 
-  const simulateUpload = async (file: File): Promise<MediaFile> => {
-    const tempFile: MediaFile = {
-      url: URL.createObjectURL(file),
-      publicId: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      alt: file.name,
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      format: file.name.split(".").pop(),
-      uploadProgress: 0,
-      status: "uploading",
+  const uploadToCloudinary = async (file: File, onProgress?: (progress: number) => void): Promise<MediaFile> => {
+    try {
+      // Get signed upload data from our API
+      const response = await fetch('/api/cloudinary/sign')
+      if (!response.ok) {
+        throw new Error('Failed to get signed upload data')
+      }
+      
+      const { timestamp, signature, apiKey, cloudName, uploadPreset } = await response.json()
+
+      // Create form data for upload
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('api_key', apiKey)
+      formData.append('timestamp', timestamp.toString())
+      formData.append('signature', signature)
+      formData.append('upload_preset', uploadPreset)
+
+      // Upload to Cloudinary with progress tracking
+      const xhr = new XMLHttpRequest()
+      
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable && onProgress) {
+            const progress = Math.round((event.loaded * 100) / event.total)
+            onProgress(progress)
+          }
+        })
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const data = JSON.parse(xhr.responseText)
+            resolve({
+              url: data.secure_url,
+              publicId: data.public_id,
+              alt: file.name,
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              format: file.name.split('.').pop(),
+              status: 'completed',
+              uploadProgress: 100,
+            })
+          } else {
+            reject(new Error('Upload failed'))
+          }
+        })
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Upload failed'))
+        })
+
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`)
+        xhr.send(formData)
+      })
+    } catch (error) {
+      console.error('Cloudinary upload error:', error)
+      throw error
     }
-
-    setUploadingFiles((prev) => [...prev, tempFile])
-
-    // Simulate upload progress
-    for (let progress = 0; progress <= 100; progress += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      setUploadingFiles((prev) =>
-        prev.map((f) => (f.publicId === tempFile.publicId ? { ...f, uploadProgress: progress } : f)),
-      )
-    }
-
-    // Mark as completed
-    const completedFile = { ...tempFile, status: "completed" as const, uploadProgress: 100 }
-    setUploadingFiles((prev) => prev.filter((f) => f.publicId !== tempFile.publicId))
-
-    return completedFile
   }
 
   const onDrop = useCallback(
@@ -120,13 +151,51 @@ export default function MediaUploader({
 
       try {
         for (const file of acceptedFiles) {
-          const uploadedFile = await simulateUpload(file)
-          onUpload(uploadedFile)
+          // Create temporary file object for progress tracking
+          const tempFile: MediaFile = {
+            url: URL.createObjectURL(file),
+            publicId: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            alt: file.name,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            format: file.name.split('.').pop(),
+            uploadProgress: 0,
+            status: 'uploading',
+          }
+
+          setUploadingFiles((prev) => [...prev, tempFile])
+
+          try {
+            // Upload to Cloudinary with progress tracking
+            const uploadedFile = await uploadToCloudinary(file, (progress) => {
+              setUploadingFiles((prev) =>
+                prev.map((f) =>
+                  f.publicId === tempFile.publicId
+                    ? { ...f, uploadProgress: progress }
+                    : f
+                )
+              )
+            })
+            
+            onUpload(uploadedFile)
+            setUploadingFiles((prev) => prev.filter((f) => f.publicId !== tempFile.publicId))
+          } catch (error) {
+            console.error('Upload error:', error)
+            setUploadingFiles((prev) =>
+              prev.map((f) =>
+                f.publicId === tempFile.publicId
+                  ? { ...f, status: 'error' as const }
+                  : f
+              )
+            )
+            toast.error(`Failed to upload ${file.name}`)
+          }
         }
         toast.success(`${acceptedFiles.length} file(s) uploaded successfully!`)
       } catch (error) {
-        console.error("Upload error:", error)
-        toast.error("Failed to upload file(s)")
+        console.error('Upload error:', error)
+        toast.error('Failed to upload file(s)')
       }
     },
     [onUpload],

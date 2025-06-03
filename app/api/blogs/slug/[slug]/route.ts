@@ -15,10 +15,9 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     // Try to populate author, but handle case where author might not exist
     let blogWithAuthor
     try {
-      blogWithAuthor = await Blog.findOne({ slug: params.slug, status: "published" }).populate(
-        "author",
-        "name avatar bio",
-      )
+      blogWithAuthor = await Blog.findOne({ slug: params.slug, status: "published" })
+        .populate("author", "name avatar bio")
+        .select("title content excerpt category tags author featuredImage publishedAt readingTime views likes commentsEnabled status slug")
     } catch (populateError) {
       console.log("Author population failed, using default author:", populateError)
       blogWithAuthor = {
@@ -42,6 +41,14 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
           avatar: { url: "/placeholder.svg?height=40&width=40&text=AA" },
           bio: "Content creator and writer",
         },
+      }
+    }
+
+    // Ensure featuredImage is properly formatted
+    if (!blogWithAuthor.featuredImage || typeof blogWithAuthor.featuredImage !== "object") {
+      blogWithAuthor.featuredImage = {
+        url: "/placeholder.svg",
+        alt: blogWithAuthor.title,
       }
     }
 

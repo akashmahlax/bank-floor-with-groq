@@ -243,43 +243,36 @@ export default function BlogsPage() {
                     <p className="blog-card-excerpt">{blog.excerpt}</p>
 
                     {/* Tags */}
-                    {blog.tags.length > 0 && (
+                    {blog.tags && blog.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-4">
                         {blog.tags.slice(0, 3).map((tag, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
                             #{tag}
                           </Badge>
                         ))}
-                        {blog.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{blog.tags.length - 3}
-                          </Badge>
-                        )}
                       </div>
                     )}
 
-                    {/* Author and Meta */}
-                    <div className="blog-card-footer">
-                      <div className="flex items-center space-x-2">
+                    {/* Author and Stats */}
+                    <div className="flex items-center justify-between pt-4">
+                      <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={blog.author.avatar?.url} />
-                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                            {getAuthorInitials(blog.author.name)}
-                          </AvatarFallback>
+                          <AvatarImage src={blog.author.avatar?.url} alt={blog.author.name} />
+                          <AvatarFallback>{getAuthorInitials(blog.author.name)}</AvatarFallback>
                         </Avatar>
-                        <span>{blog.author.name}</span>
+                        <span className="text-sm text-muted-foreground">{blog.author.name}</span>
                       </div>
-                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                        <span className="flex items-center">
-                          <Eye className="h-3 w-3 mr-1" />
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-4 w-4" />
                           {blog.views}
                         </span>
-                        <span className="flex items-center">
-                          <Heart className="h-3 w-3 mr-1" />
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-4 w-4" />
                           {blog.likes?.length || 0}
                         </span>
-                        <span className="flex items-center">
-                          <MessageCircle className="h-3 w-3 mr-1" />
+                        <span className="flex items-center gap-1">
+                          <MessageCircle className="h-4 w-4" />
                           {blog.comments?.length || 0}
                         </span>
                       </div>

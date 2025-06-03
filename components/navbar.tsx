@@ -144,10 +144,14 @@ export function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
-                  {/* <DropdownMenuItem asChild>
-                    <Link href="/settings">Settings</Link>
-                  </DropdownMenuItem> */}
-                  <DropdownMenuSeparator />
+                  {session?.user?.role === "admin" && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">Admin Dashboard</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem
                     onClick={() => signOut()}
                     className="text-red-600 focus:text-red-600"

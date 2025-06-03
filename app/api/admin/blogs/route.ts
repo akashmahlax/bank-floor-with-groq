@@ -13,9 +13,21 @@ export async function GET() {
   }
   const blogs = await Blog.find()
     .populate("author", "name email avatar")
-    .select("_id title status author")
+    .select("_id title status author featuredImage")
     .lean()
-  return NextResponse.json({ blogs })
+
+  // Ensure featuredImage is properly formatted
+  const formattedBlogs = blogs.map(blog => {
+    if (!blog.featuredImage || typeof blog.featuredImage !== "object") {
+      blog.featuredImage = {
+        url: "/placeholder.svg",
+        alt: blog.title,
+      }
+    }
+    return blog
+  })
+
+  return NextResponse.json({ blogs: formattedBlogs })
 }
 
 export async function DELETE(request: Request) {
