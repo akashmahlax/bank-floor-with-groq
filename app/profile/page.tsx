@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Calendar, Eye, Heart, Edit, Trash2, MoreVertical } from "lucide-react"
+import { Calendar, Eye, Heart, Edit, Trash2, MoreVertical, BookCheck, ScanEye, EyeIcon } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
 import Image from "next/image"
@@ -243,9 +243,9 @@ export default function ProfilePage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/blog/${blog._id}/edit`} className="flex items-center">
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit
+                                  <Link href={`/blog/view/${blog._id}/`} className="flex items-center">
+                                    <EyeIcon className="h-4 w-4 mr-2" />
+                                    Read
                                   </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
